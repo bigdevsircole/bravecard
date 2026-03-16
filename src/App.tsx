@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import './App.css'
 import { QRCodeSVG } from 'qrcode.react'
+import html2canvas from 'html2canvas'
 import { 
   User, Briefcase, FileText, Link2, Camera, Palette, 
   QrCode, Share2, Monitor, BarChart3, Zap, Check, 
   ChevronRight, Download, Copy, RotateCcw, Sparkles,
-  Instagram, Facebook, Twitter, MessageCircle, Send,
-  Smartphone, Globe
+  Instagram, Facebook, MessageCircle,
+  Globe, Linkedin
 } from 'lucide-react'
+import { FaWhatsapp, FaSnapchatGhost } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -19,10 +21,9 @@ interface SocialLinks {
   whatsapp: string
   instagram: string
   facebook: string
-  tiktok: string
-  twitter: string
-  telegram: string
   wechat: string
+  linkedin: string
+  snapchat: string
 }
 
 interface ProfileData {
@@ -104,7 +105,7 @@ const features = [
   {
     icon: Share2,
     title: 'Social Media Links',
-    description: 'Connect all your social profiles in one place. Instagram, Twitter, LinkedIn, and more.'
+    description: 'Connect all your social profiles in one place. Instagram, Facebook, LinkedIn, and more.'
   },
   {
     icon: Monitor,
@@ -120,13 +121,12 @@ const features = [
 
 // Social platform config
 const socialPlatforms = [
-  { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, placeholder: '+1234567890', color: '#25D366' },
-  { key: 'instagram', label: 'Instagram', icon: Instagram, placeholder: '@username', color: '#E4405F' },
+  { key: 'whatsapp', label: 'WhatsApp', icon: FaWhatsapp, placeholder: '+1234567890', color: '#25D366' },
+  { key: 'instagram', label: 'Instagram', icon: Instagram, placeholder: 'instagram.com/username', color: '#E4405F' },
   { key: 'facebook', label: 'Facebook', icon: Facebook, placeholder: 'facebook.com/username', color: '#1877F2' },
-  { key: 'tiktok', label: 'TikTok', icon: Smartphone, placeholder: '@username', color: '#000000' },
-  { key: 'twitter', label: 'Twitter', icon: Twitter, placeholder: '@username', color: '#1DA1F2' },
-  { key: 'telegram', label: 'Telegram', icon: Send, placeholder: '@username', color: '#0088cc' },
   { key: 'wechat', label: 'WeChat', icon: MessageCircle, placeholder: 'WeChat ID', color: '#07C160' },
+  { key: 'linkedin', label: 'LinkedIn', icon: Linkedin, placeholder: 'linkedin.com/in/username', color: '#0077b5' },
+  { key: 'snapchat', label: 'Snapchat URL', icon: FaSnapchatGhost, placeholder: 'snapchat.com/add/username', color: '#fffc00' },
 ]
 
 function App() {
@@ -143,15 +143,15 @@ function App() {
       whatsapp: '',
       instagram: '',
       facebook: '',
-      tiktok: '',
-      twitter: '',
-      telegram: '',
-      wechat: ''
+      wechat: '',
+      linkedin: '',
+      snapchat: ''
     }
   })
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
+  const profileCardRef = useRef<HTMLDivElement>(null)
 
   // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,7 +184,8 @@ function App() {
       ...Object.entries(profile.socials).reduce((acc, [key, val]) => {
         if (val) acc[key] = val
         return acc
-      }, {} as Record<string, string>)
+      }, {} as Record<string, string>),
+      design: selectedDesign
     })
     return `${baseUrl}/profile?${params.toString()}`
   }
@@ -229,6 +230,28 @@ function App() {
     }
   }
 
+  // Download entire profile card
+  const downloadProfileCard = async () => {
+    if (!profileCardRef.current) return
+    try {
+      toast.info('Generating profile card image...')
+      const canvas = await html2canvas(profileCardRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null
+      })
+      const image = canvas.toDataURL('image/png')
+      const downloadLink = document.createElement('a')
+      downloadLink.download = `profile-card-${profile.name || 'card'}.png`
+      downloadLink.href = image
+      downloadLink.click()
+      toast.success('Profile card downloaded!')
+    } catch (error) {
+      console.error('Error generating image:', error)
+      toast.error('Failed to download profile card')
+    }
+  }
+
   // Reset form
   const resetForm = () => {
     setProfile({
@@ -240,10 +263,9 @@ function App() {
         whatsapp: '',
         instagram: '',
         facebook: '',
-        tiktok: '',
-        twitter: '',
-        telegram: '',
-        wechat: ''
+        wechat: '',
+        linkedin: '',
+        snapchat: ''
       }
     })
     setCurrentStep('form')
@@ -686,6 +708,7 @@ function App() {
                   <div>
                     <h3 className="font-display text-xl font-semibold mb-4">Profile Preview</h3>
                     <div 
+                      ref={profileCardRef}
                       className="rounded-2xl overflow-hidden shadow-2xl"
                       style={{ backgroundColor: getSelectedTemplate().colors.bg }}
                     >
@@ -796,6 +819,14 @@ function App() {
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Download QR Code
+                        </Button>
+                        <Button 
+                          onClick={downloadProfileCard}
+                          variant="outline"
+                          className="w-full border-gold/50 text-gold hover:bg-gold/10"
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Download Profile Card
                         </Button>
                       </div>
 
