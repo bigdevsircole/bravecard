@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { db } from './lib/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import { ref, get, child } from 'firebase/database'
 import {
   Briefcase, Sparkles,
   Instagram, Facebook, MessageCircle,
@@ -96,11 +96,11 @@ export default function PublicProfile() {
       if (!username) return
       
       try {
-        const docRef = doc(db, 'profiles', username)
-        const docSnap = await getDoc(docRef)
+        const dbRef = ref(db)
+        const snapshot = await get(child(dbRef, `profiles/${username}`))
         
-        if (docSnap.exists()) {
-          setProfileData(docSnap.data() as ProfileData)
+        if (snapshot.exists()) {
+          setProfileData(snapshot.val() as ProfileData)
         } else {
           // Check local data (fallback)
           const savedProfilesStr = localStorage.getItem('bravecard_profiles')

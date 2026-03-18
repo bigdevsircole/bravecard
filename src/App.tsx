@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { db } from './lib/firebase'
-import { doc, setDoc } from 'firebase/firestore'
+import { ref, set } from 'firebase/database'
 
 // Types
 interface SocialLinks {
@@ -297,8 +297,8 @@ function App() {
         design: selectedDesign
       }
 
-      // Save generated profile to Firebase Firestore
-      await setDoc(doc(db, 'profiles', profile.username), profileData)
+      // Save generated profile to Firebase Realtime Database
+      await set(ref(db, 'profiles/' + profile.username), profileData)
 
       // Fallback local persistence
       const savedProfilesStr = localStorage.getItem('bravecard_profiles')

@@ -1,11 +1,12 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCC5lA37CluxUA3yUHOWNLOnEFIfrbWnu0",
   authDomain: "bravecard.firebaseapp.com",
+  databaseURL: "https://bravecard-default-rtdb.firebaseio.com",
   projectId: "bravecard",
   storageBucket: "bravecard.firebasestorage.app",
   messagingSenderId: "136694026244",
@@ -16,5 +17,5 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app);
+// Initialize Realtime Database and get a reference to the service
+export const db = getDatabase(app);
