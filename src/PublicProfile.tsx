@@ -7,7 +7,7 @@ import {
   Instagram, Facebook, MessageCircle,
   Linkedin, AlertCircle
 } from 'lucide-react'
-import { FaWhatsapp, FaSnapchatGhost } from 'react-icons/fa'
+import { FaWhatsapp, FaSnapchatGhost, FaTelegramPlane, FaTwitter } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
 
 // 1. Structure the Profile Data
@@ -15,6 +15,8 @@ export interface SocialLinks {
   whatsapp?: string
   instagram?: string
   facebook?: string
+  twitter?: string
+  telegram?: string
   wechat?: string
   linkedin?: string
   snapchat?: string
@@ -35,8 +37,10 @@ const socialPlatforms = [
   { key: 'whatsapp', label: 'WhatsApp', icon: FaWhatsapp, color: '#25D366' },
   { key: 'instagram', label: 'Instagram', icon: Instagram, color: '#E4405F' },
   { key: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2' },
-  { key: 'wechat', label: 'WeChat', icon: MessageCircle, color: '#07C160' },
+  { key: 'twitter', label: 'Twitter', icon: FaTwitter, color: '#1DA1F2' },
+  { key: 'telegram', label: 'Telegram', icon: FaTelegramPlane, color: '#2AABEE' },
   { key: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: '#0077b5' },
+  { key: 'wechat', label: 'WeChat', icon: MessageCircle, color: '#07C160' },
   { key: 'snapchat', label: 'Snapchat', icon: FaSnapchatGhost, color: '#fffc00' },
 ]
 
@@ -80,6 +84,10 @@ const formatSocialUrl = (platform: string, value: string) => {
     href = `https://wa.me/${href.replace(/\D/g,'')}`
   } else if (platform === 'instagram' && !href.startsWith('http')) {
     href = `https://instagram.com/${href.replace('@', '')}`
+  } else if (platform === 'twitter' && !href.startsWith('http')) {
+    href = `https://twitter.com/${href.replace('@', '')}`
+  } else if (platform === 'telegram' && !href.startsWith('http')) {
+    href = `https://t.me/${href.replace('@', '')}`
   } else if (!href.startsWith('http')) {
     href = `https://${href}`
   }

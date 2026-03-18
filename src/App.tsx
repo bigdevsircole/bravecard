@@ -9,7 +9,7 @@ import {
   Instagram, Facebook, MessageCircle,
   Globe, Linkedin
 } from 'lucide-react'
-import { FaWhatsapp, FaSnapchatGhost } from 'react-icons/fa'
+import { FaWhatsapp, FaSnapchatGhost, FaTelegramPlane, FaTwitter } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -23,6 +23,8 @@ interface SocialLinks {
   whatsapp: string
   instagram: string
   facebook: string
+  twitter: string
+  telegram: string
   wechat: string
   linkedin: string
   snapchat: string
@@ -127,8 +129,10 @@ const socialPlatforms = [
   { key: 'whatsapp', label: 'WhatsApp', icon: FaWhatsapp, placeholder: '+1234567890', color: '#25D366' },
   { key: 'instagram', label: 'Instagram', icon: Instagram, placeholder: 'instagram.com/username', color: '#E4405F' },
   { key: 'facebook', label: 'Facebook', icon: Facebook, placeholder: 'facebook.com/username', color: '#1877F2' },
-  { key: 'wechat', label: 'WeChat', icon: MessageCircle, placeholder: 'WeChat ID', color: '#07C160' },
+  { key: 'twitter', label: 'Twitter', icon: FaTwitter, placeholder: 'twitter.com/username', color: '#1DA1F2' },
+  { key: 'telegram', label: 'Telegram', icon: FaTelegramPlane, placeholder: 't.me/username', color: '#2AABEE' },
   { key: 'linkedin', label: 'LinkedIn', icon: Linkedin, placeholder: 'linkedin.com/in/username', color: '#0077b5' },
+  { key: 'wechat', label: 'WeChat', icon: MessageCircle, placeholder: 'WeChat ID', color: '#07C160' },
   { key: 'snapchat', label: 'Snapchat URL', icon: FaSnapchatGhost, placeholder: 'snapchat.com/add/username', color: '#fffc00' },
 ]
 
@@ -147,6 +151,8 @@ function App() {
       whatsapp: '',
       instagram: '',
       facebook: '',
+      twitter: '',
+      telegram: '',
       wechat: '',
       linkedin: '',
       snapchat: ''
@@ -260,6 +266,8 @@ function App() {
         whatsapp: '',
         instagram: '',
         facebook: '',
+        twitter: '',
+        telegram: '',
         wechat: '',
         linkedin: '',
         snapchat: ''
@@ -276,9 +284,9 @@ function App() {
       toast.error('Please enter your username and name')
       return
     }
-    // Simple validation for username (alphanumeric only)
-    if (!/^[a-zA-Z0-9_]+$/.test(profile.username)) {
-      toast.error('Username can only contain letters, numbers, and underscores')
+    // Simple validation for username (alphabets only)
+    if (!/^[a-zA-Z]+$/.test(profile.username)) {
+      toast.error('Username can only contain alphabets (letters)')
       return
     }
     setIsAnimating(true)
