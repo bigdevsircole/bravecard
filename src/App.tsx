@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import { db } from './lib/firebase'
+import { doc, setDoc } from 'firebase/firestore'
 
 // Types
 interface SocialLinks {
@@ -27,6 +29,7 @@ interface SocialLinks {
 }
 
 interface ProfileData {
+  username: string
   name: string
   occupation: string
   bio: string
@@ -135,6 +138,7 @@ function App() {
   const [isAnimating, setIsAnimating] = useState(false)
   
   const [profile, setProfile] = useState<ProfileData>({
+    username: '',
     name: '',
     occupation: '',
     bio: '',
@@ -176,18 +180,10 @@ function App() {
 
   // Generate profile URL for QR code
   const generateProfileUrl = () => {
+    // We use window.location.origin in dev, but when deployed it would be your production domain
     const baseUrl = window.location.origin
-    const params = new URLSearchParams({
-      name: profile.name,
-      occupation: profile.occupation,
-      bio: profile.bio,
-      ...Object.entries(profile.socials).reduce((acc, [key, val]) => {
-        if (val) acc[key] = val
-        return acc
-      }, {} as Record<string, string>),
-      design: selectedDesign
-    })
-    return `${baseUrl}/profile?${params.toString()}`
+    // Point directly to the new dynamic public route
+    return `${baseUrl}/p/${profile.username || 'demo'}`
   }
 
   // Get active social links
@@ -255,6 +251,7 @@ function App() {
   // Reset form
   const resetForm = () => {
     setProfile({
+      username: '',
       name: '',
       occupation: '',
       bio: '',
@@ -275,8 +272,13 @@ function App() {
 
   // Proceed to design selection
   const proceedToDesign = () => {
-    if (!profile.name.trim()) {
-      toast.error('Please enter your name')
+    if (!profile.username.trim() || !profile.name.trim()) {
+      toast.error('Please enter your username and name')
+      return
+    }
+    // Simple validation for username (alphanumeric only)
+    if (!/^[a-zA-Z0-9_]+$/.test(profile.username)) {
+      toast.error('Username can only contain letters, numbers, and underscores')
       return
     }
     setIsAnimating(true)
@@ -287,12 +289,39 @@ function App() {
   }
 
   // Proceed to preview
-  const proceedToPreview = () => {
-    setIsAnimating(true)
-    setTimeout(() => {
-      setCurrentStep('preview')
-      setIsAnimating(false)
-    }, 300)
+  const proceedToPreview = async () => {
+    try {
+      toast.loading('Publishing to cloud database...', { id: 'publish' })
+      const profileData = {
+        ...profile,
+        design: selectedDesign
+      }
+
+      // Save generated profile to Firebase Firestore
+      await setDoc(doc(db, 'profiles', profile.username), profileData)
+
+      // Fallback local persistence
+      const savedProfilesStr = localStorage.getItem('bravecard_profiles')
+      let savedProfiles: Record<string, any> = {}
+      if (savedProfilesStr) {
+        try {
+          savedProfiles = JSON.parse(savedProfilesStr)
+        } catch (e) {}
+      }
+      savedProfiles[profile.username] = profileData
+      localStorage.setItem('bravecard_profiles', JSON.stringify(savedProfiles))
+      
+      toast.success(`Profile /p/${profile.username} published live!`, { id: 'publish' })
+
+      setIsAnimating(true)
+      setTimeout(() => {
+        setCurrentStep('preview')
+        setIsAnimating(false)
+      }, 300)
+    } catch (error) {
+      console.error('Error saving to Firebase:', error)
+      toast.error('Failed to publish profile. Please try again.', { id: 'publish' })
+    }
   }
 
   // Get selected design template
@@ -554,6 +583,18 @@ function App() {
                       <div className="space-y-2">
                         <Label className="text-gray-300 flex items-center gap-2">
                           <User className="w-4 h-4 text-gold" />
+                          Username (for URL) *
+                        </Label>
+                        <Input 
+                          value={profile.username}
+                          onChange={(e) => setProfile(prev => ({ ...prev, username: e.target.value.toLowerCase() }))}
+                          placeholder="johndoe"
+                          className="bg-dark-bg border-dark-border focus:border-gold text-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-gray-300 flex items-center gap-2">
+                          <User className="w-4 h-4 text-gold" />
                           Full Name *
                         </Label>
                         <Input 
@@ -563,18 +604,19 @@ function App() {
                           className="bg-dark-bg border-dark-border focus:border-gold text-white"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-gray-300 flex items-center gap-2">
-                          <Briefcase className="w-4 h-4 text-gold" />
-                          Occupation
-                        </Label>
-                        <Input 
-                          value={profile.occupation}
-                          onChange={(e) => setProfile(prev => ({ ...prev, occupation: e.target.value }))}
-                          placeholder="Software Engineer"
-                          className="bg-dark-bg border-dark-border focus:border-gold text-white"
-                        />
-                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-gray-300 flex items-center gap-2">
+                        <Briefcase className="w-4 h-4 text-gold" />
+                        Occupation
+                      </Label>
+                      <Input 
+                        value={profile.occupation}
+                        onChange={(e) => setProfile(prev => ({ ...prev, occupation: e.target.value }))}
+                        placeholder="Software Engineer"
+                        className="bg-dark-bg border-dark-border focus:border-gold text-white"
+                      />
                     </div>
 
                     <div className="space-y-2">

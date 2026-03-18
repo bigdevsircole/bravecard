@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import Profile from './Profile.tsx'
+import PublicProfile from './PublicProfile.tsx'
 import { Toaster } from 'sonner'
 
 createRoot(document.getElementById('root')!).render(
@@ -12,6 +13,7 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/p/:username" element={<PublicProfile />} />
       </Routes>
     </BrowserRouter>
     <Toaster
